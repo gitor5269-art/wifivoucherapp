@@ -2,6 +2,7 @@ import 'package:material_ui/material_ui.dart';
 
 import '../../services/auth_service.dart';
 import '../../theme/app_theme.dart';
+import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -251,6 +252,21 @@ class _LoginScreenState extends State<LoginScreen> {
 
                       const SizedBox(height: 20),
 
+                      TextButton(
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                Navigator.of(context).push(
+                                  MaterialPageRoute<void>(
+                                    builder: (_) => const RegisterScreen(),
+                                  ),
+                                );
+                              },
+                        child: const Text('Create new account'),
+                      ),
+
+                      const SizedBox(height: 12),
+
                       // Administrator notice
                       Container(
                         padding: const EdgeInsets.symmetric(
@@ -271,7 +287,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             SizedBox(width: 6),
                             Expanded(
                               child: Text(
-                                'Authorized administrator access only. Public registration is restricted.',
+                                'Every new account receives administrator access. Create accounts only for trusted users.',
                                 style: TextStyle(
                                   fontSize: 11,
                                   color: AppTheme.textSecondary,

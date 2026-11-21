@@ -1,17 +1,22 @@
-# wifivoucherapp
+# WiFi Voucher App
 
-A new Flutter project.
+A Flutter app for managing WiFi vouchers, backed by Firebase Authentication and
+Cloud Firestore.
 
-## Getting Started
+## Run the app
 
-This project is a starting point for a Flutter application.
+```bash
+flutter pub get
+flutter run
+```
 
-A few resources to get you started if this is your first Flutter project:
+The Firebase project configuration is included for Android and Web. Firebase
+Email/Password sign-in must be enabled in the Firebase Console for login and
+account creation to work.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+## Account access
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+The login screen allows users to create accounts. Newly created accounts are
+signed in immediately and receive administrator access. Use this only for a
+trusted audience; public registration allows anyone to access the administrator
+portal.

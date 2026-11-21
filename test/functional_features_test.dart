@@ -48,6 +48,45 @@ void main() {
       expect(authService.isAuthenticated, isFalse);
     });
 
+    test('Rejects registration with invalid email or password', () async {
+      expect(
+        () => authService.createAccount(
+          email: 'invalid-email',
+          password: 'password123',
+        ),
+        throwsA(predicate((e) => e.toString().contains('valid email format'))),
+      );
+      expect(
+        () => authService.createAccount(
+          email: 'newadmin@example.com',
+          password: '123',
+        ),
+        throwsA(
+          predicate((e) => e.toString().contains('at least 6 characters')),
+        ),
+      );
+    });
+
+    test(
+      'Rejects registration when Firebase Authentication is unavailable',
+      () {
+        expect(
+          () => authService.createAccount(
+            email: 'newadmin@example.com',
+            password: 'password123',
+          ),
+          throwsA(
+            predicate(
+              (error) => error.toString().contains(
+                'Firebase Authentication is unavailable',
+              ),
+            ),
+          ),
+        );
+        expect(authService.isAuthenticated, isFalse);
+      },
+    );
+
     test('Logout clears session and updates auth state', () async {
       await authService.signOut();
 

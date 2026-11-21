@@ -29,6 +29,40 @@ class AuthService {
   bool get isAuthenticated => currentAdminEmailNotifier.value != null;
   String? get currentAdminEmail => currentAdminEmailNotifier.value;
 
+  String _validatedEmail(String email, {required String emptyMessage}) {
+    final cleanEmail = email.trim();
+    if (cleanEmail.isEmpty) {
+      throw Exception(emptyMessage);
+    }
+    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(cleanEmail)) {
+      throw Exception('Please enter a valid email format.');
+    }
+    return cleanEmail;
+  }
+
+  String _validatedPassword(String password) {
+    final cleanPassword = password.trim();
+    if (cleanPassword.isEmpty) {
+      throw Exception('Please enter your password.');
+    }
+    if (cleanPassword.length < 6) {
+      throw Exception('Password must be at least 6 characters.');
+    }
+    return cleanPassword;
+  }
+
+  FirebaseAuth _requireAuth() {
+    final auth = _auth;
+    if (auth != null) return auth;
+
+    final initError = FirebaseService().initError;
+    throw Exception(
+      initError == null
+          ? 'Firebase Authentication is unavailable. Check your Firebase setup and connection.'
+          : 'Firebase could not initialize: $initError',
+    );
+  }
+
   void _initAuthListener() {
     try {
       _auth?.authStateChanges().listen((User? user) {
@@ -41,31 +75,12 @@ class AuthService {
 
   /// Sign in admin using email and password
   Future<void> signIn({required String email, required String password}) async {
-    final cleanEmail = email.trim();
-    final cleanPassword = password.trim();
-
-    if (cleanEmail.isEmpty) {
-      throw Exception('Please enter admin email address.');
-    }
-    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(cleanEmail)) {
-      throw Exception('Please enter a valid email format.');
-    }
-    if (cleanPassword.isEmpty) {
-      throw Exception('Please enter your password.');
-    }
-    if (cleanPassword.length < 6) {
-      throw Exception('Password must be at least 6 characters.');
-    }
-
-    final auth = _auth;
-    if (auth == null) {
-      final initError = FirebaseService().initError;
-      throw Exception(
-        initError == null
-            ? 'Firebase Authentication is unavailable. Check your Firebase setup and connection.'
-            : 'Firebase could not initialize: $initError',
-      );
-    }
+    final cleanEmail = _validatedEmail(
+      email,
+      emptyMessage: 'Please enter admin email address.',
+    );
+    final cleanPassword = _validatedPassword(password);
+    final auth = _requireAuth();
 
     try {
       final credential = await auth.signInWithEmailAndPassword(
@@ -94,6 +109,43 @@ class AuthService {
     } catch (e) {
       debugPrint('[AuthService] Unexpected auth error: $e');
       throw Exception('Login failed: ${e.toString()}');
+    }
+  }
+
+  /// Creates a Firebase account and signs the new user in.
+  Future<void> createAccount({
+    required String email,
+    required String password,
+  }) async {
+    final cleanEmail = _validatedEmail(
+      email,
+      emptyMessage: 'Please enter email address.',
+    );
+    final cleanPassword = _validatedPassword(password);
+    final auth = _requireAuth();
+
+    try {
+      final credential = await auth.createUserWithEmailAndPassword(
+        email: cleanEmail,
+        password: cleanPassword,
+      );
+      currentAdminEmailNotifier.value = credential.user?.email;
+    } on FirebaseAuthException catch (e) {
+      debugPrint('[AuthService] FirebaseAuthException: ${e.code}');
+      final message = switch (e.code) {
+        'email-already-in-use' => 'An account already exists for this email.',
+        'invalid-email' => 'Please enter a valid email address.',
+        'weak-password' => 'Password must be at least 6 characters.',
+        'operation-not-allowed' =>
+          'Email/password sign-in is not enabled for this Firebase project.',
+        'network-request-failed' =>
+          'Network error. Check your connection and try again.',
+        _ => e.message ?? 'Account creation failed.',
+      };
+      throw Exception(message);
+    } catch (e) {
+      debugPrint('[AuthService] Unexpected account creation error: $e');
+      throw Exception('Account creation failed: ${e.toString()}');
     }
   }
 
