@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1085357682452",
+    "project_id": "wifivoucherapp-9be19",
+    "storage_bucket": "wifivoucherapp-9be19.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1085357682452:android:59a5972f37bbaea37b9c01",
+        "android_client_info": {
+          "package_name": "com.shan.wifivoucher"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAQ1mxQUzWn9SBflEv3HCOs1r2hrS-12vE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
